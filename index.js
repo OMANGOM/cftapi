@@ -16,8 +16,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 
 app.use("/api", routes);
-const dbUrl = 'mongodb://0.0.0.0:27017/cftapp';
-//const dbUrl = `mongodb+srv://rajan:RgyFeQt0pUKASmVi@cluster0.ayvk4v6.mongodb.net/musicapp`;
+//const dbUrl = 'mongodb://0.0.0.0:27017/cftapp';
+const dbUrl = `mongodb+srv://rajan:RgyFeQt0pUKASmVi@cluster0.ayvk4v6.mongodb.net/cftapp`;
 
 db.mongoose
   .connect(dbUrl, 
