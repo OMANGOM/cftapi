@@ -3,9 +3,11 @@ const mongoose = require("mongoose");
 const db = require("../model");
 const User = db.user;
 const Role = db.role;
+const axios= require("axios");
 
 var jwt = require("jsonwebtoken");
 var bcrypt = require("bcrypt");
+
 
 
 exports.signIn = (req, res) => {
@@ -61,6 +63,7 @@ exports.signup = (req, res) => {
       email: req.body.email,
       password: bcrypt.hashSync(req.body.password, 8),
       dob: req.body.dob,
+      fitBitId:req.body.fitBitId
     });
     Role.findOne({ role: req.body.roles }, (err, roles) => {
       if (err) {
@@ -120,3 +123,4 @@ exports.signup = (req, res) => {
       }
     });
   };
+

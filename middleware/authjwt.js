@@ -1,4 +1,4 @@
-const { ConfigurationOptions } = require("aws-sdk");
+
 const jwt = require("jsonwebtoken");
 const config = require("../config/authConfig");
 const db = require("../model")
