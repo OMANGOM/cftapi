@@ -29,4 +29,4 @@ jobs:
             --exclude deploy_key \
             --exclude /.github/ \
             ./ ${{env.dest}}
-          pm2 restart api.omangom.com
+          /usr/bin/pm2 restart api.omangom.com
