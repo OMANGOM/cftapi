@@ -29,4 +29,15 @@ jobs:
             --exclude deploy_key \
             --exclude /.github/ \
             ./ ${{env.dest}}
-          /usr/bin/pm2 restart api.omangom.com
+            
+      - name: Restart service
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: "host.universalinitiatives.org"
+          username: "root"
+          key: ${{ secrets.DEPLOY_KEY }}
+          port: "5767"
+          script: |
+            cd /home/cityblock/api.omangom.com
+            npm install
+            pm2 restart api.omangom.com
