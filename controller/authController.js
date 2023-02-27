@@ -37,7 +37,7 @@ exports.signIn = (req, res) => {
           });
         }
   
-        var token = jwt.sign({userId:user._id, email: user.email, fitBitAccessToken: user.fitBitAccessToken, fitBitId:user.fitBitId , firstName: user.firstName, lastName: user.lastName }, config.secret, {
+        var token = jwt.sign({userId:user._id, email: user.email, fitBitAccessToken: user.fitBitAccessToken, fitBitId:user.fitBitId , firstName: user.firstName, lastName: user.lastName }, authConfig.secret, {
           expiresIn: (86400 * 30) // 1 month
         });
   
