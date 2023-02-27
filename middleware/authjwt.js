@@ -12,8 +12,11 @@ verifyToken=(req, res, next) =>{
         if(err){
             return res.status(401).send({message:"Unauthorized access!", isUnauthorized: true });
         }
-        console.log(decode);
-        req.userId = decode.id;
+        console.log("decode",decode);
+        req.userId = decode.userId;
+        req.email= decode.email;
+        req.fitBitId = decode.fitBitId;
+        req.fitBitAccessToken = decode.fitBitAccessToken;
         next();
     })
 

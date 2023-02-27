@@ -1,132 +1,134 @@
-const express = require('express')
-const app = express()
-const routes = require('./routes');
-const cors = require('cors');
+const express = require("express");
+const app = express();
+const routes = require("./routes");
+const cors = require("cors");
 const db = require("./model");
-const seedUser = require('./dataseed/seedUser');
-const seedRole = require('./dataseed/seedrole');
- 
+const seedUser = require("./dataseed/seedUser");
+const seedRole = require("./dataseed/seedrole");
+const authDAO = require("./dao/authdao");
 const authConfig = require("./config/authConfig");
 
- 
-const port = 3000
+const passport = require("passport");
+const session = require("express-session");
+const { config } = require("dotenv");
+const FitbitStrategy = require("./fitBitLib").FitbitOAuth2Strategy;
+const cookieParser = require("cookie-parser");
+const port = 3000;
+
 app.use(cors());
-
- 
-
+app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }))
+app.use(express.urlencoded({ extended: true }));
 
- 
 app.use("/api", routes);
-const dbUrl = 'mongodb://0.0.0.0:27017/cftapp';
+const dbUrl = "mongodb://0.0.0.0:27017/cftapp";
 //const dbUrl = `mongodb+srv://rajan:RgyFeQt0pUKASmVi@cluster0.ayvk4v6.mongodb.net/cftapp`;
-
 db.mongoose
-  .connect(dbUrl, 
-    { 
-      useNewUrlParser: true, 
-      bufferCommands: false,
-      useUnifiedTopology: true
-    })
+  .connect(dbUrl, {
+    useNewUrlParser: true,
+    bufferCommands: false,
+    useUnifiedTopology: true,
+  })
   .then(async () => {
     console.log("Connection to db established.");
-     await seedRole.initializeRole().then((err, role)=>{
+    await seedRole.initializeRole().then((role, err) => {
       if (err) {
         console.log("Error in role Creation: ", err);
         process.exit();
       }
-      else{
-       console.log("Role", role);
-       var user =  seedUser.seedUser();
-       console.log(user);
-      }
-     
-     }); 
-   
+      var user = seedUser.seedUser();
+    });
   })
   .catch((err) => {
     console.log("Error in db connection: ", err);
     process.exit();
   });
- 
- 
-  
 
-  app.use((error, req, res, next) => {
-    console.log('Requested URL ---- ', req?.originalUrl, ' ---------- Time: ', Date.now())
-    const message = `this is the unexpected field-> ${error}`;
-    console.log("message: ",  message  );
-   return res.status(500).send(message);
-  })
-  
+app.use((error, req, res, next) => {
+  console.log(
+    "Requested URL ---- ",
+    req?.originalUrl,
+    " ---------- Time: ",
+    Date.now()
+  );
+  const message = `this is the unexpected field-> ${error}`;
+  console.log("message: ", message);
+  return res.status(500).send(message);
+});
 
-  app.use((req, res, next) => {
-    console.log('Requested URL ---- ', req?.originalUrl, ' ---------- Time: ', Date.now())
-    console.log(req.query.code);
-    next()
-  })
-  
-
+app.use((req, res, next) => {
+  console.log(
+    "Requested URL ---- ",
+    req?.originalUrl,
+    " ---------- Time: ",
+    Date.now()
+  );
+  console.log(req.query.code);
+  next();
+});
 
 //app.get('/', (req, res) => res.send('Welcome to CFT API'))
 
- //
- var passport = require('passport');
- var session = require('express-session');
-const { config } = require('dotenv');
-var FitbitStrategy = require('./lib').FitbitOAuth2Strategy;
- app.use(session({resave: true,
-  saveUninitialized: true,
-  secret: authConfig.secret }));
-
 app.use(passport.initialize());
-app.use(passport.session({ }));
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: true,
+    secret: authConfig.secret,
+  })
+);
+app.use(
+  passport.session({
+    resave: false,
+    saveUninitialized: true,
+  })
+);
 
- 
-const CLIENT_ID = '2395T3';
-const CLIENT_SECRET = '9c19b8490e7de175ec25620404ac747e';
-
-var FitbitStrategy = require( 'passport-fitbit-oauth2' ).FitbitOAuth2Strategy;
+const CLIENT_ID = "2395T3";
+const CLIENT_SECRET = "9c19b8490e7de175ec25620404ac747e";
 app.use(passport.initialize());
-passport.use(new FitbitStrategy({
-    clientID:     CLIENT_ID,
+var fitbitStrategy = new FitbitStrategy(
+  {
+    clientID: CLIENT_ID,
     clientSecret: CLIENT_SECRET,
-    callbackURL: "http://localhost:3000/auth/fitbit/callback"
+    scope: ["activity", "heartrate", "location", "profile"],
+    callbackURL: "http://localhost:3000/api/auth/fitbit/callback",
   },
-  function(accessToken, refreshToken, profile, done) {
-    //console.log(profile,">>>>",done);
-    console.log(accessToken,"-------------------------------" ,refreshToken);
-    //console.log(expires_in,">>>>",scope);
-    db.user.find({ fitBitId: profile.id }, function (err, user) {
-      return done(err, user);
+  function (accessToken, refreshToken, profile, expires_in, done) {
+    console.log(
+      accessToken,
+      "-----------",
+      expires_in,
+      "--------------------",
+      refreshToken
+    );
+    authDAO.updateAccessToken(accessToken, refreshToken, profile);
+    return done(null, {
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+      profile: profile,
     });
   }
-));
-passport.serializeUser(function(user, done) {
+);
+
+passport.use(fitbitStrategy);
+
+passport.serializeUser(function (user, done) {
   done(null, user);
 });
 
-passport.deserializeUser(function(user, done) {
-  done(null, user);
+passport.deserializeUser(function (obj, done) {
+  done(null, obj);
 });
-app.get('/auth11/fitbit',
-passport.authenticate('fitbit', { scope: ['activity','heartrate','location','profile'] }
-));
+
+var fitbitAuthenticate = passport.authenticate("fitbit", {
+  successRedirect: "/auth/fitbit/success",
+  failureRedirect: "/auth/fitbit/failure",
+});
 //http://localhost:3000/auth/fitbit/callback?code=cfdd5446d4aa0c14a4614189accaa4f8f8e1b0cc#_=_
-app.get('/auth/fitbit/callback', passport.authenticate( 'fitbit', { 
-      successRedirect: '/auth/fitbit/success',
-      failureRedirect: '/auth/fitbit/failure'
-}));
-app.get('/auth/fitbit/success', function(req, res, next) {
-  res.send({
-    token:req.accessToken,
-    refreshToken: req.refreshToken,
-    user: req.user
-  });
+app.get("/api/auth/fitbit/callback", fitbitAuthenticate);
+app.get("/auth/fitbit/success", function (req, res, next) {
+  res.send(req.user);
 });
 
- //
- 
- 
-app.listen(port, () => console.log(`CFT API listening on port ${port}!`))
+app.listen(port, () => console.log(`CFT API listening on port ${port}!`));

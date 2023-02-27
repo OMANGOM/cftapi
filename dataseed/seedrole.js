@@ -4,8 +4,8 @@ const Role = db.role;
 module.exports={
     initializeRole: async ()=>{
    
-    db.role.estimatedDocumentCount(async (err, count) =>{
-      if(!err && count === 0){
+    return await db.role.find({role:"admin"}).then((role, err) =>{
+      if(!err && role.length===0){
           new Role({
             role: "admin"
         })
@@ -14,8 +14,8 @@ module.exports={
             return Role;
           });
         }
-        if(!err && count != 0){
-            console.log(count);
+        if(!err && role.length != 0){
+            return role;
         }
       })
     }

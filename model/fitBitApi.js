@@ -14,7 +14,7 @@ const FitBitAPi = mongoose.model(
         reqTokenExpiresSec: Number,
         reqAuthCodeExpiresSec: Number,
         lastUpdateTs: Date,
-
+        basic_token : String,
         isActive : {
             type : Boolean,
             default : true

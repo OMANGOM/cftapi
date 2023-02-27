@@ -46,11 +46,12 @@ function Strategy(options, verify) {
   options.tokenURL = options.tokenURL || 'https://api.fitbit.com/oauth2/token';
   options.scopeSeparator = options.scopeSeparator || ' ';
   options.customHeaders = {
-    Authorization:  'Basic '+ new Buffer(options.clientID + ':' + options.clientSecret).toString('base64')
+    Authorization:  'Basic '+ new Buffer.from(options.clientID + ':' + options.clientSecret).toString('base64')
   };
-
+  //console.log(options);
   OAuth2Strategy.call(this, options, verify);
   this.name = 'fitbit';
+  //console.log(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>",this);
 }
 
 /**
@@ -99,9 +100,7 @@ Strategy.prototype.userProfile = function(accessToken, done) {
       var profile = { provider: 'fitbit' };
       profile.id = json.user.encodedId;
       profile.displayName = json.user.displayName;
-
       profile._json = json;
-
       done(null, profile);
     } catch(e) {
       done(e);

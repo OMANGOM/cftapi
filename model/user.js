@@ -1,5 +1,5 @@
-const { Date } = require("mongoose");
-var mongoose = require("mongoose");
+const mongoose = require("mongoose");
+const { stringify } = require("qs");
 
 const User = mongoose.model(
   "User",
@@ -19,6 +19,11 @@ const User = mongoose.model(
         ref : 'Role'
       },
       fitBitId:String,
+      fitBitAccessToken: String,
+      fitBitRefreshToken: String,
+      fitBitTokenExpiry: Date,
+      fitBitScope: String,
+      fitBitTokenType: String,
     },
     { timestamps: true }
   )

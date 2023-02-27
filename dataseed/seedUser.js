@@ -6,7 +6,7 @@ const Role = db.role;
 module.exports = {
   seedUser: async () => {
     
-    const rr  = await   Role.findOne({ role: 'admin' });
+    const rr  = await  Role.findOne({ role: 'admin' });
     db.user.estimatedDocumentCount( (err, count) => {
       if (!err && count === 0) {
          Role.findOne({role:'admin'},(err, roles) => {
