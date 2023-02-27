@@ -9,9 +9,7 @@ module.exports = {
     if(!req.params.fromDate){
       res.send({message:"fromDate param is missing", success:false});
     }
-  
-    var userData = await  userDAO.getUserData(req.userId);
-
+    //var userData = await  userDAO.getUserData(req.userId);
     var fitBitToken =req.fitBitAccessToken;
     var fitBitUser = req.fitBitId;
       var config = {
@@ -22,14 +20,11 @@ module.exports = {
           Authorization: `Bearer ${fitBitToken}`,
         },
       };
-      console.log("config",config);
        axios(config)
         .then(function (response) {
-            console.log(response);
           res.send(JSON.stringify(response.data));
         })
         .catch(function (error) {
-            console.log(error);
           res.send(error);
         });
 

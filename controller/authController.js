@@ -151,9 +151,6 @@ exports.garminAccessToken= (req, res)=>{
 
 exports.oauthAuthorizeUser =(req, res)=>{
 console.log("TTTTTTT",req.query);
-//https://apis.garmin.com/tools/oauthAuthorizeUser?action=step3&oauth_token=668089e6-5c20-4c17-b368-1cb3e895fd54&oauth_verifier=Lnef9ylY2o
-//var bodyObject = qs.parse(body);
-
 var authToken = req.query.oauth_token;
 var authVerifier= req.query.oauth_verifier;
 request.post({
@@ -183,7 +180,33 @@ exports.UpdateFitbitRequestToken=(req, res)=>{
   userData.fitBitTokenType= req.body.token_type;
 
   userDAO.updateUser(req.userId, userData).then((response)=>{
-    res.send(response);
+    console.log(response);
+    var token = jwt.sign(
+      {
+        userId: response.data._id,
+        email: response.data.email,
+        fitBitAccessToken: response.data.fitBitAccessToken,
+        fitBitId: response.data.fitBitId,
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+      },
+      authConfig.secret,
+      {
+        expiresIn: 86400 * 30, // 1 month
+      }
+    );
+
+
+    const responseData ={
+      firstName : response.data.firstName,
+      lastName : response.data.lastName,
+      email : response.data.email,
+      isActive : response.data.isActive,
+      fitBitId : response.data.fitBitId,
+      accessToken : token
+    }
+    console.log(responseData);
+    res.send(responseData);
   });
 
  
