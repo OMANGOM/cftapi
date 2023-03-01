@@ -9,8 +9,10 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const qs = require('qs');
 const userDAO = require('../dao/userDAO') ;
+const authdao = require("../dao/authdao");
 
 exports.signIn = (req, res) => {
+  console.log("email:", req.body.email)
     User.findOne({
       email: req.body.email
     })
@@ -36,10 +38,26 @@ exports.signIn = (req, res) => {
             message: "Invalid Password!"
           });
         }
-  
-        var token = jwt.sign({userId:user._id, email: user.email, fitBitAccessToken: user.fitBitAccessToken, fitBitId:user.fitBitId , firstName: user.firstName, lastName: user.lastName }, authConfig.secret, {
-          expiresIn: (86400 * 30) // 1 month
-        });
+        // userId: response.data._id,
+        // email: response.data.email,
+        // fitBitAccessToken: req.body.access_token,
+        // fitBitId:  req.body.user_id,
+        // firstName: response.data.firstName,
+        // lastName: response.data.lastName,
+        var token = jwt.sign(
+          {
+            userId: user._id,
+            email: user.email,
+            fitBitAccessToken: user.fitBitAccessToken,
+            fitBitId: user.fitBitId,
+            firstName: user.firstName,
+            lastName: user.lastName,
+          },
+          authConfig.secret,
+          {
+            expiresIn: 86400 * 30, // 1 month
+          }
+        );
   
         // var authorities = [];
   
@@ -168,33 +186,21 @@ request.post({
  
 exports.UpdateFitbitRequestToken=(req, res)=>{
   //req.userId 
+  //req.email
   const date = new Date()
   
   console.log(req.userId);
   var userData={};
   userData.fitBitId= req.body.user_id;
   userData.fitBitAccessToken= req.body.access_token;
-  userData.fitBitRefreshToken= req.body.refreshToken;
+  userData.fitBitRefreshToken= req.body.refresh_token;
   userData.fitBitTokenExpiry= date.setSeconds(date.getSeconds() + req.body.expires_in);
   userData.fitBitScope= req.body.scope;
   userData.fitBitTokenType= req.body.token_type;
 
   userDAO.updateUser(req.userId, userData).then((response)=>{
-    console.log(response);
-    var token = jwt.sign(
-      {
-        userId: response.data._id,
-        email: response.data.email,
-        fitBitAccessToken: response.data.fitBitAccessToken,
-        fitBitId: response.data.fitBitId,
-        firstName: response.data.firstName,
-        lastName: response.data.lastName,
-      },
-      authConfig.secret,
-      {
-        expiresIn: 86400 * 30, // 1 month
-      }
-    );
+    console.log("User Data Updted:", response);
+    var token = authdao
 
 
     const responseData ={
@@ -214,6 +220,7 @@ exports.UpdateFitbitRequestToken=(req, res)=>{
 
 exports.fitBitRefreshToken=async (req, res)=>{
 var userData = await  userDAO.getUserData(req.userId);
+const date = new Date()
 var refreshToken = userData.data.fitBitRefreshToken;
   var config = {
     method: "post",
@@ -226,11 +233,49 @@ var refreshToken = userData.data.fitBitRefreshToken;
   console.log("config",config);
    axios(config)
     .then(function (response) {
-        console.log(response);
-      res.send(JSON.stringify(response.data));
+      console.log(response.data);
+      var userData={};
+      userData.fitBitId= response.data.user_id;
+      userData.fitBitAccessToken= response.data.access_token;
+      userData.fitBitRefreshToken= response.data.refresh_token;
+      userData.fitBitTokenExpiry= date.setSeconds(date.getSeconds() + response.data.expires_in);
+      userData.fitBitScope= response.data.scope;
+      userData.fitBitTokenType= response.data.token_type;
+      console.log( req.userId,">>>>>>>>>>>>>>>>>",userData,">>>>>>>>>>>>>>>>");
+      userDAO.updateUser(req.userId, userData).then((user, err)=>{
+        console.log("User Data Updted:", user);
+        if(err) res.send({message: err, success: false})
+        var token = jwt.sign(
+          {
+            userId: user.data._id,
+            email: user.data.email,
+            fitBitAccessToken: response.data.access_token,
+            fitBitId: response.data.user_id,
+            firstName: user.data.firstName,
+            lastName: user.data.lastName,
+          },
+          authConfig.secret,
+          {
+            expiresIn: 86400 * 30, // 1 month
+          }
+        );
+    
+    
+        const responseData ={
+          firstName : user.data.firstName,
+          lastName : user.data.lastName,
+          email : user.data.email,
+          isActive : user.data.isActive,
+          fitBitId : user.data.fitBitId,
+          accessToken : token
+        }
+        console.log(responseData);
+        res.send(responseData);
+      });
+ 
     })
     .catch(function (error) {
-        console.log(error);
+        console.log("Error",error);
       res.send(error);
     });
 };

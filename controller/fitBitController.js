@@ -25,7 +25,13 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
+        console.log(error.response.status);
+        console.log(error.response.statusText);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -46,7 +52,13 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
+        console.log(error.response.status);
+        console.log(error.response.statusText);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -67,7 +79,13 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
+        console.log(error.response.status);
+        console.log(error.response.statusText);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -88,7 +106,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -109,7 +131,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -132,8 +158,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
   //Get Breathing Rate Summary by Date
@@ -157,8 +186,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -182,8 +214,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
   
@@ -210,8 +245,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -235,8 +273,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -260,8 +301,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
   //Get Heart Rate Time Series by Date
@@ -286,8 +330,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -311,8 +358,11 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
 
@@ -336,8 +386,36 @@ module.exports = {
         res.send(JSON.stringify(response.data));
       })
       .catch(function (error) {
-        console.log(error);
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
         res.send(error);
+        }
       });
   },
+  getDailyActivitySummary: async(req, res)=>{
+    var fitBitUser = req.fitBitId;
+    var fitBitToken = req.fitBitAccessToken;
+    var config = {
+      method: "get",
+      maxBodyLength: Infinity,
+      url: `${authConfig.FITBIT_BASEURL}user/${fitBitUser}/activities/date/${req.params.onDate}.json`,
+      headers: {
+        Authorization: `Bearer ${fitBitToken}`,
+      },
+    };
+    console.log("config", config);
+    axios(config)
+      .then(function (response) {
+        res.send(JSON.stringify(response.data));
+      })
+      .catch(function (error) {
+        if(error.response.statusText==="Unauthorized" || error.response.status==401){
+          res.send({message:"FitBit Token Expire, Please refresh token", success: "false" })
+        }else{
+        res.send(error);
+        }
+      });
+  },
+
 };

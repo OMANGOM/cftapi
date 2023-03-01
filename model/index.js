@@ -8,6 +8,8 @@ db.role = require('./role');
 db.fitBitApi = require('./fitBitApi');
 db.fitBitUser= require('./fitBitUser');
 db.fitBitUserProfile= require('./fitBitUserProfile');
+db.category= require('./categories');
+db.activityLevel= require('./activityLevels');
 db.session = require('./session');
 
 db.ROLES = ["user", "admin"];

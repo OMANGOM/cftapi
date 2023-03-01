@@ -15,7 +15,9 @@ const FitbitStrategy = require("./fitBitLib").FitbitOAuth2Strategy;
 const cookieParser = require("cookie-parser");
 const port = 3000;
 
-app.use(cors());
+app.use(cors({
+  origin: '*'
+}));
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

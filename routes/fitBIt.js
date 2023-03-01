@@ -30,6 +30,9 @@ router.route("/getVO2Maxbyinterval/:startDate/:endDate").get([authJwt.verifyToke
 router.route("/getheartratebydate/:onDate/:period").get([authJwt.verifyToken], fitBitController.getHeartRateTimeSeriesbyDate);
 router.route("/getheartratebydaterange/:startDate/:endDate").get([authJwt.verifyToken], fitBitController.getHeartRateTimeSeriesbyDateRange);
 
+//Get Get Daily Activity Summary
+//getDailyActivitySummary
+router.route("/getdailyactivitysummary/:onDate").get([authJwt.verifyToken], fitBitController.getDailyActivitySummary);
 
 module.exports= router;
 
