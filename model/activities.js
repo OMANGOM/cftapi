@@ -1,18 +1,18 @@
 var mongoose = require("mongoose");
 
-const activityLevels = mongoose.model(
-    "activityLevels",
+const activities = mongoose.model(
+    "activities",
     new mongoose.Schema({
         id: Number,
-        maxSpeedMPH: Number,
+        accessLevel: String,
         mets: Number,
-        minSpeedMPH : Number,
+        hasSpeed: Boolean,
         name: String,
-        parentId:Number,
+        categoryId: Number,
         isActive : {
             type : Boolean,
             default : true
         }
     }, { timestamps: true })
 );
-module.exports = activityLevels;  
+module.exports = activities;  

@@ -9,7 +9,6 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const qs = require('qs');
 const userDAO = require('../dao/userDAO') ;
-const authdao = require("../dao/authdao");
 
 exports.signIn = (req, res) => {
   console.log("email:", req.body.email)
@@ -193,14 +192,27 @@ exports.UpdateFitbitRequestToken=(req, res)=>{
   var userData={};
   userData.fitBitId= req.body.user_id;
   userData.fitBitAccessToken= req.body.access_token;
-  userData.fitBitRefreshToken= req.body.refresh_token;
+  userData.fitBitRefreshToken= req.body.refreshToken;
   userData.fitBitTokenExpiry= date.setSeconds(date.getSeconds() + req.body.expires_in);
   userData.fitBitScope= req.body.scope;
   userData.fitBitTokenType= req.body.token_type;
 
   userDAO.updateUser(req.userId, userData).then((response)=>{
-    console.log("User Data Updted:", response);
-    var token = authdao
+    console.log("User Data Updated:", response);
+    var token = jwt.sign(
+      {
+        userId: response.data._id,
+        email: response.data.email,
+        fitBitAccessToken: req.body.access_token,
+        fitBitId:  req.body.user_id,
+        firstName: response.data.firstName,
+        lastName: response.data.lastName,
+      },
+      authConfig.secret,
+      {
+        expiresIn: 86400 * 30, // 1 month
+      }
+    );
 
 
     const responseData ={
@@ -243,7 +255,7 @@ var refreshToken = userData.data.fitBitRefreshToken;
       userData.fitBitTokenType= response.data.token_type;
       console.log( req.userId,">>>>>>>>>>>>>>>>>",userData,">>>>>>>>>>>>>>>>");
       userDAO.updateUser(req.userId, userData).then((user, err)=>{
-        console.log("User Data Updted:", user);
+       // console.log("User Data Updted:", user);
         if(err) res.send({message: err, success: false})
         var token = jwt.sign(
           {
@@ -275,8 +287,8 @@ var refreshToken = userData.data.fitBitRefreshToken;
  
     })
     .catch(function (error) {
-        console.log("Error",error);
-      res.send(error);
+        console.log("Error",error.response.data);
+      res.send(error.response.data);
     });
 };
 

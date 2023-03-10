@@ -67,4 +67,24 @@ module.exports = {
       });
   },
 
+  getUserDataByFitBitId: (userID) => {
+    return db.user
+      .findOne({ fitBitId: userID })
+      .then((data, err) => {
+        console.log("EEEEEEEEEEEEEEEEEE",data)
+        return {
+          success: true,
+          message: "User fetched successfully.",
+          data: data,
+        };
+      })
+      .catch((err) => {
+        return {
+          success: false,
+          message: "Failed to get user details.",
+          err,
+        };
+      });
+  },
+
 };
